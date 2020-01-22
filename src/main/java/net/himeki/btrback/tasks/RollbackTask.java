@@ -15,21 +15,28 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class RollbackTask {
-    public boolean doRollbackStageOne(String snapshotName, Btrback plugin) {
+    Btrback plugin;
+
+    public RollbackTask(Btrback plugin) {
+        this.plugin = plugin;
+    }
+
+    public boolean doRollbackStageOne(String snapshotName) {
         String serverJarPath = plugin.getConfig().getString("rollback.startupJar");
         if (!new File(plugin.getRootDir() + "/" + serverJarPath).exists()) {
             Bukkit.getLogger().warning("Cannot find proper server jar file in root directory with the name from config.yml.");
             return false;
         }
         String timeStamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date());
-        if (!new BackupTask().doBackup(timeStamp, true, plugin)) {
+        if (!new BackupTask(plugin).doBackup(timeStamp, true)) {
             Bukkit.getLogger().warning("Cannot back up the latest server state. Rollback canceled.");
             return false;
         }
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(plugin.getRootDir() + "/rollback.tmp"));
-            writer.write(timeStamp);
+            writer.write(snapshotName);
             writer.close();
+            Bukkit.getLogger().info("Saved rollback.tmp for rollback.");
         } catch (IOException e) {
             e.printStackTrace();
             new BtrOperation().deleteSubvol(plugin.getBackupsDir() + timeStamp);
@@ -42,6 +49,7 @@ public class RollbackTask {
             getFileMethod.setAccessible(true);
             File pluginJarFile = (File) getFileMethod.invoke(plugin);
             Files.copy(pluginJarFile.toPath(), Paths.get(serverJarPath), StandardCopyOption.REPLACE_EXISTING);
+            Bukkit.getLogger().info("Replaced server jar file.");
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException e) {
             e.printStackTrace();
             Bukkit.getLogger().warning("Cannot replace server jar with plugin jar.");

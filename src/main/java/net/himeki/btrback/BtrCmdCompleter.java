@@ -19,16 +19,18 @@ public class BtrCmdCompleter implements TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         switch (args.length) {
             case 1: {
-                return Arrays.asList("backup", "rollback");
+                return Arrays.asList("backup", "rollback", "reload");
             }
             case 2: {
                 if (args[0].equalsIgnoreCase("rollback")) {
-                    ArrayList<String> rollbackList = new ArrayList<String>();
-                    rollbackList.add("list");
-                    for (String timeStamp : new BtrRecord(plugin).listBackups(false)) {
-                        rollbackList.add(timeStamp);
+                    if (sender.hasPermission("btrback.rollback")) {
+                        ArrayList<String> rollbackList = new ArrayList<String>();
+                        rollbackList.add("list");
+                        for (String timeStamp : new BtrRecord(plugin).listBackups(false)) {
+                            rollbackList.add(timeStamp);
+                        }
+                        return rollbackList;
                     }
-                    return rollbackList;
                 }
             }
         }

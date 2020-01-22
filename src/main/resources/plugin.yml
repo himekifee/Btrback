@@ -7,7 +7,11 @@ description: A minecraft backup plugin which takes advance of btrfs snapshot mec
 
 commands:
   btrback:
-    description: Backup server
-    usage: /btrback [backup/rollback]
-    permission:
-    permission-message: You don't have <permission>
+
+permissions:
+  btrback.backup:
+    description: permission to backup
+  btrback.rollback:
+    description: permission to rollback
+  btrback.reload:
+    description: permission to reload plugin

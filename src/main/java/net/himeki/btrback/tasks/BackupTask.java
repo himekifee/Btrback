@@ -6,7 +6,13 @@ import net.himeki.btrback.Btrback;
 import org.bukkit.Bukkit;
 
 public class BackupTask {
-    public boolean doBackup(String timeStamp, Boolean isBeforeRollback, Btrback plugin) {
+    Btrback plugin;
+
+    public BackupTask(Btrback plugin) {
+        this.plugin = plugin;
+    }
+
+    public boolean doBackup(String timeStamp, Boolean isBeforeRollback) {
         Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), "save-all");
         BtrOperation operation = new BtrOperation();
         if (!operation.isSubvol(plugin.getRootDir())) {
@@ -29,8 +35,8 @@ public class BackupTask {
                 Bukkit.getLogger().warning("Cannot write the record to json file, backup canceled.");
                 return false;
             }
-
         }
+        Bukkit.getLogger().info("Snapshot " + timeStamp + " created.");
         return true;
     }
 }
