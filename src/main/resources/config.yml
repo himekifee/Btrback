@@ -1,0 +1,4 @@
+backup:
+
+rollback:
+  startupJar: "server.jar"

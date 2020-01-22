@@ -1,0 +1,13 @@
+name: Btrback
+version: @version@
+main: net.himeki.btrback.Btrback
+api-version: 1.13
+authors: [Hork]
+description: A minecraft backup plugin which takes advance of btrfs snapshot mechanism
+
+commands:
+  btrback:
+    description: Backup server
+    usage: /btrback [backup/rollback]
+    permission:
+    permission-message: You don't have <permission>
