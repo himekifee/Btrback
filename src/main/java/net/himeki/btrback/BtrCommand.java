@@ -57,7 +57,7 @@ public class BtrCommand implements CommandExecutor {
                             } else sender.sendMessage("Failed to finish stage one. Check console logs for details.");
                         } else {
                             if (args[1].equalsIgnoreCase("list")) {
-                                sender.sendMessage("Valid backups are listed below:");
+                                sender.sendMessage(ChatColor.GREEN + "Valid backups are listed below:");
                                 for (String a : backupsList) {
                                     sender.sendMessage(a);
                                 }

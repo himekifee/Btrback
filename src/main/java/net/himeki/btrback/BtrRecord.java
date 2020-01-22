@@ -66,10 +66,10 @@ public class BtrRecord {
         JsonArray backupArray = rootObj.getAsJsonArray("backupSnapshots");
         JsonArray rollbackArray = rootObj.getAsJsonArray("rollbackSnapshots");
         for (JsonElement timeStamp : backupArray)
-            list.add(timeStamp.toString());
+            list.add(timeStamp.getAsString());
         if (includeIgnored)
             for (JsonElement timeStamp : rollbackArray)
-                list.add(timeStamp.toString());
+                list.add(timeStamp.getAsString());
         list.sort(Comparator.reverseOrder());
         return list;
     }
