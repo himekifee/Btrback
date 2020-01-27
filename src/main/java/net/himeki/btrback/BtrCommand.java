@@ -41,7 +41,11 @@ public class BtrCommand implements CommandExecutor {
                 }
                 if (args[0].equalsIgnoreCase("reload")) {
                     if (sender.hasPermission("btrback.reload"))
-                        plugin.reloadSchedule();
+                        if (plugin.reloadSchedule())
+
+                            sender.sendMessage(ChatColor.GREEN + "Configuration reloaded.");
+
+                        else sender.sendMessage(ChatColor.RED + "Failed to reload configuration.");
                     else sender.sendMessage(ChatColor.RED + "You don't have the permission to reload the plugin.");
                 }
             case 2:

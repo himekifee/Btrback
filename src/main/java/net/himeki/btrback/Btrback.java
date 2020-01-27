@@ -1,20 +1,14 @@
 package net.himeki.btrback;
 
-import com.coreoz.wisp.Scheduler;
-import com.coreoz.wisp.schedule.Schedule;
-import com.coreoz.wisp.schedule.Schedules;
 import com.google.gson.stream.JsonWriter;
-import net.himeki.btrback.tasks.BackupTask;
-import net.himeki.btrback.tasks.RollbackTask;
+import net.himeki.btrback.tasks.ScheduledTask;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.util.Date;
 
 
 public final class Btrback extends JavaPlugin {
@@ -23,7 +17,8 @@ public final class Btrback extends JavaPlugin {
     private String parentDir;
     private String backupsDir;
     private String recordsJsonPath;
-    private Scheduler scheduler;
+    private BukkitScheduler scheduler;
+    private int backupTaskId;
 
     @Override
     public void onEnable() {
@@ -31,7 +26,7 @@ public final class Btrback extends JavaPlugin {
         parentDir = new File(rootDir).getParentFile().getParentFile().getAbsolutePath();
         backupsDir = parentDir + "/btrbackups";
         recordsJsonPath = parentDir + "/btrbackups/backups.json";
-        scheduler = new Scheduler();
+        scheduler = Bukkit.getServer().getScheduler();
         if (!new File(this.getDataFolder().getAbsolutePath() + "/config.yml").exists())
             this.saveDefaultConfig();                       //Save config file on first startup
         File btrbackFolder = new File(backupsDir);
@@ -71,6 +66,7 @@ public final class Btrback extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+        scheduler.cancelTasks(this);
     }
 
 
@@ -94,23 +90,29 @@ public final class Btrback extends JavaPlugin {
         return backupsDir;
     }
 
-    public void loadSchedule() {
+    public boolean loadSchedule() {
+        this.reloadConfig();
         int interval = this.getConfig().getInt("backup.period.interval");
+        int ticks = 0;
         String unit = this.getConfig().getString("backup.period.unit");
-        Schedule schedule = null;
         if (unit.equalsIgnoreCase("minutes"))
-            schedule = Schedules.fixedDelaySchedule(Duration.ofMinutes(interval));
+            ticks = interval * 20 * 60;
         else if (unit.equalsIgnoreCase("hours"))
-            schedule = Schedules.fixedDelaySchedule(Duration.ofHours(interval));
+            ticks = interval * 20 * 60 * 60;
         else if (unit.equalsIgnoreCase("days"))
-            schedule = Schedules.fixedDelaySchedule(Duration.ofDays(interval));
-        if (schedule != null) {
-            scheduler.schedule("backup", () -> new BackupTask(this).doBackup(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date()), false), schedule);
-        } else Bukkit.getLogger().warning("Unknown schedule. Check config.yml.");
+            ticks = interval * 20 * 60 * 60 * 24;
+        backupTaskId = scheduler.scheduleSyncRepeatingTask(this, new ScheduledTask(this, "backup"), 15 * 20 * 60, ticks);
+        if (backupTaskId != -1) {
+            Bukkit.getLogger().info("Scheduled backup task with " + interval + " " + unit + " period.");
+            return true;
+        } else {
+            Bukkit.getLogger().warning("Unknown schedule. Check config.yml.");
+            return false;
+        }
     }
 
-    public void reloadSchedule() {
-        scheduler.cancel("backup");
-        loadSchedule();
+    public boolean reloadSchedule() {
+        scheduler.cancelTasks(this);
+        return loadSchedule();
     }
 }

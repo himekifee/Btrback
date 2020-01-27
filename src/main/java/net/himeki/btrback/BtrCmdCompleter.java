@@ -24,15 +24,13 @@ public class BtrCmdCompleter implements TabCompleter {
             case 2: {
                 if (args[0].equalsIgnoreCase("rollback")) {
                     if (sender.hasPermission("btrback.rollback")) {
-                        ArrayList<String> rollbackList = new ArrayList<String>();
+                        ArrayList<String> rollbackList = new BtrRecord(plugin).listBackups(false);
                         rollbackList.add("list");
-                        for (String timeStamp : new BtrRecord(plugin).listBackups(false)) {
-                            rollbackList.add(timeStamp);
-                        }
                         return rollbackList;
                     }
                 }
             }
+
         }
         return null;
     }

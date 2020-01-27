@@ -4,6 +4,8 @@ import net.himeki.btrback.BtrOperation;
 import net.himeki.btrback.BtrRecord;
 import net.himeki.btrback.Btrback;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 
 public class BackupTask {
     Btrback plugin;
@@ -36,7 +38,12 @@ public class BackupTask {
                 return false;
             }
         }
-        Bukkit.getLogger().info("Snapshot " + timeStamp + " created.");
+        Bukkit.getLogger().info(ChatColor.GREEN + "Snapshot " + timeStamp + " created.");
+        for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+            if (player.isOp()) {
+                player.sendMessage(ChatColor.GREEN + "Snapshot " + timeStamp + " created.");
+            }
+        }
         return true;
     }
 }
