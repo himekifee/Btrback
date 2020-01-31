@@ -74,4 +74,27 @@ public class BtrRecord {
         return list;
     }
 
+    public boolean removeRecord(String timestamp) {
+        JsonArray backupArray = rootObj.getAsJsonArray("backupSnapshots");
+        JsonArray rollbackArray = rootObj.getAsJsonArray("rollbackSnapshots");
+        boolean a = backupArray.remove(new JsonPrimitive(timestamp));
+        boolean b = rollbackArray.remove(new JsonPrimitive(timestamp));
+        if (!a && !b)
+            return false;
+        rootObj.remove("backupSnapshots");
+        rootObj.add("backupSnapshots", backupArray);
+        rootObj.remove("rollbackSnapshots");
+        rootObj.add("rollbackSnapshots", rollbackArray);
+        String jsonString = new GsonBuilder().setPrettyPrinting().create().toJson(rootObj);
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(jsonFile));
+            writer.write(jsonString);
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
 }

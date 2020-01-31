@@ -15,3 +15,5 @@ permissions:
     description: permission to rollback
   btrback.reload:
     description: permission to reload plugin
+  btrback.purge:
+    description: permission to purge old backups

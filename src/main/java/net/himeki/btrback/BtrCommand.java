@@ -1,6 +1,7 @@
 package net.himeki.btrback;
 
 import net.himeki.btrback.tasks.BackupTask;
+import net.himeki.btrback.tasks.PurgeTask;
 import net.himeki.btrback.tasks.RollbackTask;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -56,9 +57,10 @@ public class BtrCommand implements CommandExecutor {
                         if (backupsList.contains(args[1]))                                                              //Valid timeStamp, do rollback
                         {
                             if (new RollbackTask(plugin).doRollbackStageOne(args[1])) {
-                                sender.sendMessage("Successfully done stage one, shutting the server. Please start it to complete stage two.");
+                                sender.sendMessage(ChatColor.GREEN + "Successfully done stage one, shutting the server. Please start it to complete stage two.");
                                 Bukkit.shutdown();
-                            } else sender.sendMessage("Failed to finish stage one. Check console logs for details.");
+                            } else
+                                sender.sendMessage(ChatColor.RED + "Failed to finish stage one. Check console logs for details.");
                         } else {
                             if (args[1].equalsIgnoreCase("list")) {
                                 sender.sendMessage(ChatColor.GREEN + "Valid backups are listed below:");
@@ -70,6 +72,16 @@ public class BtrCommand implements CommandExecutor {
                     } else {
                         sender.sendMessage(ChatColor.RED + "You don't have the permission to rollback.");
                     }
+                }
+                if (args[0].equalsIgnoreCase("purge")) {
+                    if (sender.hasPermission("btrback.purge")) {
+                        ArrayList<String> backupsList = new BtrRecord(plugin).listBackups(false);
+                        if (backupsList.contains(args[1])) {
+                            if (new PurgeTask(plugin).doPurge(args[1])) {
+                                sender.sendMessage(ChatColor.GREEN + "Successfully purged backups before " + args[1]);
+                            } else sender.sendMessage(ChatColor.RED + "Failed to purge.");
+                        } else sender.sendMessage(ChatColor.RED + "Target backup is not in the list.");
+                    } else sender.sendMessage(ChatColor.RED + "You don't have the permission to purge.");
                 }
         }
         return true;
