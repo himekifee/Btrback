@@ -22,6 +22,7 @@ public class RollbackTask {
     }
 
     public boolean doRollbackStageOne(String snapshotName) {
+        plugin.reloadConfig();
         String serverJarPath = plugin.getConfig().getString("rollback.startupJar");
         if (!new File(plugin.getRootDir() + "/" + serverJarPath).exists()) {
             Bukkit.getLogger().warning("Cannot find proper server jar file in root directory with the name from config.yml.");
