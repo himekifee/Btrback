@@ -28,7 +28,7 @@ processResources {
     }
 }
 
-task fatJar(type: Jar) {
+task jarWithDeps(type: Jar) {
     manifest {
         attributes 'Main-Class': 'net.himeki.btrback.Rollback'
     }

@@ -19,7 +19,7 @@ public class PurgeTask {
         ArrayList<String> snapshotList = new BtrRecord(plugin).listBackups(false);
         snapshotList.sort(Comparator.naturalOrder());
         int index = snapshotList.indexOf(timestamp);
-        for (int i = 0; i < index; i++) {
+        for (int i = 0; i < index; i++) {                               //remove snapshots in list by order(timestamp)
             if (!operation.deleteSubvol(plugin.getBackupsDir() + "/" + snapshotList.get(i)))
                 return false;
             if (!new BtrRecord(plugin).removeRecord(snapshotList.get(i)))

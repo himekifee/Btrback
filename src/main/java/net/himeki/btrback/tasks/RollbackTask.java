@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.jar.JarFile;
 
 public class RollbackTask {
     Btrback plugin;
@@ -21,11 +22,11 @@ public class RollbackTask {
         this.plugin = plugin;
     }
 
-    public boolean doRollbackStageOne(String snapshotName) {
+    public boolean doRollbackStageOne(String snapshotName) {                     //stage one of rollback process, including taking latest snapshot and replace serve jar
         plugin.reloadConfig();
-        String serverJarPath = plugin.getConfig().getString("rollback.startupJar");
-        if (!new File(plugin.getRootDir() + "/" + serverJarPath).exists()) {
-            Bukkit.getLogger().warning("Cannot find proper server jar file in root directory with the name from config.yml.");
+        String serverJarPath = guessServerJarPath();
+        if (!new File(serverJarPath).exists()) {
+            Bukkit.getLogger().warning("Cannot find proper server jar file.");
             return false;
         }
         String timeStamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new Date());
@@ -59,7 +60,7 @@ public class RollbackTask {
         return true;
     }
 
-    public boolean doRollbackStageTwo() {
+    public boolean doRollbackStageTwo() {                             //stage two of rollback process, instantiate by Rollback class which is the main class of the replaced jar
         try {
             BufferedReader reader = new BufferedReader(new FileReader("rollback.tmp"));
             String timeStamp = reader.readLine();
@@ -78,5 +79,33 @@ public class RollbackTask {
             e.printStackTrace();
         }
         return true;
+    }
+
+    public String guessServerJarPath() {
+        boolean isPaper = false;
+        isPaper = Bukkit.getServer().getVersion().contains("Paper");
+        if (isPaper) {
+            //server is paper spigot. get server jar by walk through server directory
+            File[] files = new File(plugin.getRootDir()).listFiles();
+            for (File file : files) {
+                if (file.getName().contains(".jar")) {
+                    // Open the JAR file
+                    String mainClassName = null;
+                    try {
+                        mainClassName = new JarFile(file).getManifest().getMainAttributes().getValue("Main-Class");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    if (mainClassName.equalsIgnoreCase("io.papermc.paperclip.Paperclip")) {
+                        return file.getPath();
+                    }
+                }
+            }
+
+        } else {
+            //server is bukkit/spigot. return server jar by getting url from server jar
+            return Bukkit.getServer().getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+        }
+        return "";
     }
 }

@@ -1,7 +1,5 @@
 backup:
   period:
     unit: minutes
-    interval: 30
+    interval: 120
 
-rollback:
-  startupJar: "server.jar"
