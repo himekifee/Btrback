@@ -18,7 +18,6 @@ public final class Btrback extends JavaPlugin {
     private String backupsDir;
     private String recordsJsonPath;
     private BukkitScheduler scheduler;
-    private int backupTaskId;
 
     @Override
     public void onEnable() {
@@ -101,9 +100,11 @@ public final class Btrback extends JavaPlugin {
             ticks = interval * 20 * 60 * 60;
         else if (unit.equalsIgnoreCase("days"))
             ticks = interval * 20 * 60 * 60 * 24;
-        backupTaskId = scheduler.scheduleSyncRepeatingTask(this, new ScheduledTask(this, "backup"), 15 * 20 * 60, ticks);
-        if (backupTaskId != -1) {
+        int backupTaskId = scheduler.scheduleSyncRepeatingTask(this, new ScheduledTask(this, "backup"), 15 * 20 * 60, ticks);
+        int autoPurgeRaskId = scheduler.scheduleSyncRepeatingTask(this, new ScheduledTask(this, "auto_purge"), 0, 20 * 60 * 60);
+        if (backupTaskId != -1 && autoPurgeRaskId != -1) {
             Bukkit.getLogger().info("Scheduled backup task with " + interval + " " + unit + " period.");
+            Bukkit.getLogger().info("Scheduled auto purge task with 1 hour check period.");
             return true;
         } else {
             Bukkit.getLogger().warning("Unknown schedule. Check config.yml.");

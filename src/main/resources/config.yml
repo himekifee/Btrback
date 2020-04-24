@@ -3,3 +3,9 @@ backup:
     unit: minutes
     interval: 120
 
+auto-purge:
+  period:
+    hours: 0
+    days: 7
+    weeks: 0
+    months: 0

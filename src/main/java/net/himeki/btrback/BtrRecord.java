@@ -3,8 +3,10 @@ package net.himeki.btrback;
 import com.google.gson.*;
 
 import java.io.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collections;
 
 public class BtrRecord {
     Btrback plugin;
@@ -22,8 +24,8 @@ public class BtrRecord {
             e.printStackTrace();
         }
         JsonParser parser = new JsonParser();
-        JsonObject rootObj = parser.parse(br).getAsJsonObject();
-        this.rootObj = rootObj;
+        assert br != null;
+        this.rootObj = parser.parse(br).getAsJsonObject();
     }
 
     public boolean addToBackups(String timeStamp) {
@@ -62,7 +64,7 @@ public class BtrRecord {
     }
 
     public ArrayList<String> listBackups(boolean includeIgnored) {
-        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list = new ArrayList<>();
         JsonArray backupArray = rootObj.getAsJsonArray("backupSnapshots");
         JsonArray rollbackArray = rootObj.getAsJsonArray("rollbackSnapshots");
         for (JsonElement timeStamp : backupArray)
@@ -70,7 +72,15 @@ public class BtrRecord {
         if (includeIgnored)
             for (JsonElement timeStamp : rollbackArray)
                 list.add(timeStamp.getAsString());
-        list.sort(Comparator.reverseOrder());
+        list.sort((date1,date2)-> {
+            try {
+                return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").parse(date1).compareTo(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").parse(date2));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return 0;
+        });
+        Collections.reverse(list);
         return list;
     }
 
